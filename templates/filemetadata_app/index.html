@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}File Metadata Microservice{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="header">
+            <h1>File Metadata Microservice</h1>
+        </div>
+        <blockquote>
+            User stories:
+            <ol>
+                <li>I can submit a FormData object that includes a file upload.</li>
+                <li>When I submit something, I will receive the file size in bytes within the JSON response.</li>
+            </ol>
+        </blockquote>
+        <p>
+            <h3>Example usage:</h3>
+            <h4>Please choose a file to upload:</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="btn-group input-group">
+                        <label class="btn btn-default btn-file">
+                            Browse <input type="file" id="fileToUpload" style="display: none;"/>
+                        </label>
+                        <span class="input-group-addon" id="basic-addon3">please/select/a/file/from/your/workstation/</span>
+                    </div>
+                    <br/>
+                    <div>
+                        <button type="button" class="btn btn-default" id="file-upload">Upload</button>
+                    </div>
+
+                </div>
+                <div class="col-md-4">&nbsp;</div>
+                <div class="col-md-4">&nbsp;</div>
+
+            </div>
+
+        </p>
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript">
+
+        $(function(){
+
+            $("input:file").change(function(){
+                // console.log($(this));
+                var fileName = $(this).val();
+                $("#basic-addon3").text(fileName);
+
+            });
+
+            $("#file-upload").click(function(){
+
+                var objFile = $("#fileToUpload");
+                var file = objFile[0].files[0];
+                if(file == undefined){
+                    alert("Please choose a file");
+
+                }else{
+
+                    // using jQuery
+                    function getCookie(name) {
+                        var cookieValue = null;
+                        if (document.cookie && document.cookie !== '') {
+                            var cookies = document.cookie.split(';');
+                            for (var i = 0; i < cookies.length; i++) {
+                                var cookie = jQuery.trim(cookies[i]);
+                                // Does this cookie string begin with the name we want?
+                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                    break;
+                                }
+                            }
+                        }
+                        return cookieValue;
+                    }
+                    var csrftoken = getCookie('csrftoken');
+
+                    function csrfSafeMethod(method) {
+                        // these HTTP methods do not require CSRF protection
+                        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                    }
+                    $.ajaxSetup({
+                        beforeSend: function(xhr, settings) {
+                            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                            }
+                        }
+                    });
+
+                    $.ajax({
+                        url:'http://localhost:8000/api/upload/'+file.name,
+                        method: 'POST',
+                        data: file,
+                        contentType: false,
+                        processData: false,
+                        success: function(data){
+                            // console.log(data.file_size);
+                            alert("FILE SIZE: "+data.file_size);
+                        }
+
+                    });
+
+                }
+
+            });
+        });
+    </script>
+{% endblock %}
