@@ -1,5 +1,9 @@
 # API: File Metadata Microservice #
 
+## Requirements
+- Django==1.10
+- djangorestframework==3.6.4
+
 ## Install
 In the terminal
 ```
